@@ -1,15 +1,15 @@
 # sbt-antlr4
 
-This plugin provides an ability to run antlr4 when compiling in sbt 0.13.
+This plugin provides an ability to run antlr4 when compiling in sbt 0.12.
 
 ## How to use
 
 Put your .g4 files in `src/main/antlr4` directory and make `project/sbt-antlr4.sbt`
 file with the following contents:
 
-    resolvers += "simplytyped.com" at "http://simplytyped.com/repo/releases"
+    resolvers += "neglectedvalue.github.com" at "http://neglectedvalue.github.io/mvn/releases"
 
-    addSbtPlugin("com.simplytyped" % "sbt-antlr4" % "0.7.1")
+    addSbtPlugin("com.github.neglectedvalue" % "sbt-antlr4" % "0.7.1")
 
 And, add `antlr4Settings` to your `build.sbt` file.
 
@@ -19,7 +19,7 @@ And, add `antlr4Settings` to your `build.sbt` file.
 
 `-package` option can be given by the following setting:
 
-    antlr4PackageName in Antlr4 := Some("com.simplytyped")
+    antlr4PackageName in Antlr4 := Some("com.github.neglectedvalue")
 
 You can also adjust `-listener`, `-no-listener`, `-visitor`, `-no-visitor` options:
 

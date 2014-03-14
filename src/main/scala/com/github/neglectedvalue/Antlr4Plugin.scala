@@ -1,4 +1,4 @@
-package com.simplytyped
+package com.github.neglectedvalue
 
 import sbt._
 import Keys._
@@ -12,20 +12,22 @@ object Antlr4Plugin extends Plugin {
   val antlr4GenListener = SettingKey[Boolean]("antlr4-gen-listener")
   val antlr4GenVisitor = SettingKey[Boolean]("antlr4-gen-visitor")
 
-  def antlr4GeneratorTask : Def.Initialize[Task[Seq[File]]] = Def.task {
-    val cachedCompile = FileFunction.cached(streams.value.cacheDirectory / "antlr4", FilesInfo.lastModified, FilesInfo.exists) {
+  def antlr4GeneratorTask: Project.Initialize[Task[Seq[File]]] =
+  (cacheDirectory, state, managedClasspath in Compile, sourceDirectory in Antlr4, javaSource in Antlr4, antlr4PackageName in Antlr4, antlr4GenListener in Antlr4, antlr4GenVisitor in Antlr4) map {
+      (cacheDirectory, state, managedClasspath, sourceDirectory, javaSource, antlr4PackageName, antlr4GenListener, antlr4GenVisitor) =>
+    val cachedCompile = FileFunction.cached(cacheDirectory / "antlr4", FilesInfo.lastModified, FilesInfo.exists) {
       in : Set[File] =>
         runAntlr(
           srcFiles = in,
-          targetBaseDir = (javaSource in Antlr4).value,
-          classpath = (managedClasspath in Compile).value.files,
-          log = streams.value.log,
-          packageName = (antlr4PackageName in Antlr4).value,
-          listenerOpt = (antlr4GenListener in Antlr4).value,
-          visitorOpt = (antlr4GenVisitor in Antlr4).value
+          targetBaseDir = javaSource,
+          classpath = managedClasspath.files,
+          log = state.log,
+          packageName = antlr4PackageName,
+          listenerOpt = antlr4GenListener,
+          visitorOpt = antlr4GenVisitor
         )
     }
-    cachedCompile(((sourceDirectory in Antlr4).value ** "*.g4").get.toSet).toSeq
+    cachedCompile((sourceDirectory ** "*.g4").get.toSet).toSeq
   }
 
   def runAntlr(
@@ -44,11 +46,11 @@ object Antlr4Plugin extends Plugin {
     val sourceArgs = srcFiles.map{_.toString}
     val args = baseArgs ++ packageArgs ++ listenerArgs ++ visitorArgs ++ sourceArgs
     val exitCode = Process("java", args) ! log
-    if(exitCode != 0) sys.error(s"Antlr4 failed with exit code $exitCode")
+    if(exitCode != 0) sys.error("Antlr4 failed with exit code %d".format(exitCode))
     (targetDir ** "*.java").get.toSet
   }
 
-  val antlr4Settings = inConfig(Antlr4)(Seq(
+  lazy val antlr4Settings: Seq[Project.Setting[_]] = inConfig(Antlr4)(Seq(
     sourceDirectory <<= (sourceDirectory in Compile) {_ / "antlr4"},
     javaSource <<= sourceManaged in Compile,
     antlr4Generate <<= antlr4GeneratorTask,

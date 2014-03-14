@@ -2,11 +2,15 @@ sbtPlugin := true
 
 name := "sbt-antlr4"
 
-organization := "com.simplytyped"
+organization := "com.github.neglectedvalue"
 
 version := "0.7.1"
 
-publishTo := Some {
-  val target = if(version.value contains "SNAPSHOT") "snapshots" else "releases"
-  Resolver.file("simplytyped.com", new File("/Users/ihji/Works/simplytyped.github.io/repo",target))
+scalaVersion := "2.9.2"
+
+publishTo <<= (version) { (version) =>
+  val target = if (version contains "SNAPSHOT") "snapshots" else "releases"
+  Some {
+    Resolver.file("neglectedvalue.github.io", new File("/Users/negval/Code/me/neglectedvalue.github.io/mvn", target))
+  }
 }
